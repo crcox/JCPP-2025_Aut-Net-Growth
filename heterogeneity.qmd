@@ -1,0 +1,49 @@
+---
+title: "Heterogeneity of Vocabulary Growth in Autistic and Non-autistic Children"
+author: "Chris Cox"
+format: revealjs
+editor: visual
+---
+
+## Overview {.smaller}
+
+Autistic children produce their first words over a wide range of ages, and typically much later than typically developing children. Thus, language development in autistic children is often described as heterogeneous and delayed. 
+
+
+## Heterogeneous {.smaller}
+
+There are at least three ways language development can be heterogeneous:
+
+ 1. Variable age of onset
+ 2. Variable rate of development
+ 3. Variable order of words entering vocabulary
+
+We know autistic children are heterogeneous in ways (1) and (2). Here we consider (3).
+
+## Vocabulary size of acquisition (VSOA)
+
+* Analogous to age of acquisition
+* Vocabulary size at which a word becomes more likely to be produced than not.
+* Can be estimated with logistic regression.
+
+
+## Modeling probability of word production {.smaller}
+
+* Regress whether or not each child produces a word on their vocabulary sizes.
+* Group can be included as a moderating variable to estimate VSOA for multiple groups.
+* Once fit, the model will estimate the probability of producing a word given a vocabulary size (and group membership).
+* VSOA can be estimated as the vocabulary size that corresponds with an estimated probability of 0.5.
+
+
+# VSOA Example
+
+## Generate data
+
+```{r generate data}
+
+```
+
+
+## Measuring heterogeneity
+
+* If all kids learned words in the same order, the model of VSOA would have a 
