@@ -1,4 +1,8 @@
-d_meta_preproc <- readRDS("data/cdi-metadata-preproc.rds")
+library(dplyr)
+library(purrr)
+library(tidyr)
+
+d_meta_preproc <- readRDS("data/cdi-metadata.rds")
 tmp <- readRDS("data/vsoa-autistic-nonautistic-diff-ndar-id-fix-remodel-v2.rds") |>
     left_join(
         select(
