@@ -21,13 +21,6 @@ homonyms <- find_homonyms(cdi_metadata_preproc$word)
 cdi_metadata_preproc <- subset(cdi_metadata_preproc, !homonyms)
 
 
-# Exclude words with aoa > 30 months ----
-# Because the CDI is administered to children in the age range 16 -- 30 months,
-# words with AoA greater than 30 cannot be estimated and so are represented as
-# missing data.
-cdi_metadata_preproc$word[is.na(cdi_metadata_preproc[["aoa_produces"]])]
-cdi_metadata_preproc <- subset(cdi_metadata_preproc, !is.na(cdi_metadata_preproc[["aoa_produces"]]))
-
 # Save processed CDI metadata ----
-save(cdi_metadata_preproc, file = "./data/cdi-metadata-preproc.Rdata")
+saveRDS(cdi_metadata_preproc, file = "./data/cdi-metadata-preproc.rds")
 

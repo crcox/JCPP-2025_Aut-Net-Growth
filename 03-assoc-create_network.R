@@ -1,9 +1,10 @@
-library('dplyr')
-library('tidyr')
-library('netbuildr')
-# netbuildr can be obtained from https://github.com/crcox/netbuilder
+library(dplyr)
+library(purrr)
+library(tidyr)
+library(netbuildr)
+# netbuildr can be obtained from https://github.com/crcox/netbuildr
 # install with:
-#     devtools::install_github("crcox/netbuilder")
+#     remotes::install_github("crcox/netbuilder")
 
 trim_prefix <- function(x, prefix) {
     return(trimws(x, which = "left", whitespace = prefix))
@@ -25,27 +26,22 @@ load_to_list <- function(files) {
     return(as.list(X))
 }
 
+# Load metadata ----
+cdi_metadata_preproc <- readRDS("data/cdi-metadata-preproc.rds")
+
 # Load processed word associations ----
-associations <- load_to_list(c(
-  "./data/associations-adult-preproc.Rdata",
-  "./data/associations-child-preproc.Rdata"
-))
-names(associations) <- trim_prefix(names(associations), "associations_")
+associations <- list(
+  adult = readRDS("./data/associations-adult-preproc.rds"),
+  child = readRDS("./data/associations-child-preproc.rds")
+)
 
 # Create associative networks ----
-assocnet <- lapply(
-  associations,
-  FUN = function(d) netbuildr::create_unweighted_network(d[['lemma']], d[['RESPONSE']])
-)
-assocnet <- lapply(
-  assocnet,
-  FUN = function(x, ix) x[ix, ix],
-  ix = as.character(cdi_metadata_preproc$lemma)
-)
+assocnet <- associations |>
+    map(\(.x, ix) {
+        netbuildr::create_unweighted_network(.x$lemma, .x$RESPONSE)[ix, ix]
+    }, ix = cdi_metadata_preproc$lemma)
 
 # Save association networks ----
-names(assocnet) <- add_prefix(names(assocnet), prefix = "assocnet_")
-
 if (!dir.exists("./network")) dir.create("./network")
-save(assocnet_adult_preproc, file = './network/assocnet-adult-preproc.Rdata', envir = list2env(assocnet))
-save(assocnet_child_preproc, file = './network/assocnet-child-preproc.Rdata', envir = list2env(assocnet))
+iwalk(assocnet, ~ saveRDS(.x, file.path("network", paste("assocnet", .y, "preproc.rds", sep = "-"))))
+

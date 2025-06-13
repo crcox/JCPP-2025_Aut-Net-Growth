@@ -9,11 +9,13 @@ library(netgrowr)
 # Load id key ----
 d <- readRDS("./data/vsoa-autistic-nonautistic-diff-ndar-id-fix-remodel-v2.rds")
 m <- readRDS("./data/cdi-metadata-preproc.rds")
-graphs <- list(
-    child = upgrade_graph(readRDS("./network/child-net-graph-preproc.rds")),
-    childes = upgrade_graph(readRDS("./network/childes-net-graph-preproc.rds"))
+adjmat_lst <- list(
+    child = readRDS("./network/assocnet-child-preproc.rds"),
+    childes = readRDS("./network/assocnet-childes-preproc.rds")
 )
-adjmat_lst <- map(graphs, ~ as_adjacency_matrix(.x, sparse = FALSE))
+graphs <- map(adjmat_lst, ~ {
+    igraph::graph_from_adjacency_matrix(.x, mode = "directed", weighted = NULL)
+})
 
 # N.B. all.equal(rowSums(adjmat_lst), degree(g, mode = "out")) == TRUE
 #     Thus, a row in `adjmat_lst` represents the connection "from" the word
@@ -52,9 +54,9 @@ vsoa_df <- d |>
 
 vsoa_df <- vsoa_df |>
     mutate(
-        by_20 = cut(vsoa, c(-Inf, seq(20, 660, by = 20), Inf), ordered_result = TRUE),
-        by_40 = cut(vsoa, c(-Inf, seq(20, 660, by = 40), Inf), ordered_result = TRUE),
-        by_60 = cut(vsoa, c(-Inf, seq(20, 660, by = 60), Inf), ordered_result = TRUE)
+        by_20 = cut(vsoa, c(-Inf, seq(20, 540, by = 20), Inf), ordered_result = TRUE),
+        by_40 = cut(vsoa, c(-Inf, seq(20, 540, by = 40), Inf), ordered_result = TRUE),
+        by_60 = cut(vsoa, c(-Inf, seq(20, 540, by = 60), Inf), ordered_result = TRUE)
     )
 
 vsoa_plot <- vsoa_df |>
@@ -108,7 +110,7 @@ growthvalues <- map(vsoa_lst, function (vsoa, adjmat_lst) {
 # Save growth values ----
 saveRDS(
     growthvalues,
-    file = "./network/growthvalues-autistic-nonautistic-20250520.rds"
+    file = "./network/growthvalues-autistic-nonautistic-20250520-540max.rds"
 )
 
 # Save wide-form data for lexical growth modeling ----
@@ -131,13 +133,18 @@ summary(phono_baseline)
 
 # LONG VERSION ----
 modelvars <- growthvalues |>
-    filter(vocab_step != "(660, Inf]") |>
+    filter(vocab_step != "(540, Inf]") |>
     left_join(phono_baseline, by = "word")
 
-saveRDS(modelvars, file = "./network/modelvars-vsoa-long-20250520.rds")
+saveRDS(modelvars, file = "./network/modelvars-vsoa-long-20250520-540max.rds")
 
 
 # WIDE VERSION ----
+# Read growth values ----
+growthvalues <- readRDS(
+    "./network/growthvalues-autistic-nonautistic-20250520-540max.rds"
+)
+
 factor_with <- function(levels, labels) {
     key <- tibble(levels, labels) |> distinct() |> drop_na()
     factor(levels, key$levels, key$labels)
@@ -164,15 +171,8 @@ modelvars <- growthvalues |>
     mutate(
         group = factor(group, c("autistic", "nonautistic")),
         word = factor_with(vid, word)
-    )
+    ) |>
+    filter(vocab_step != "(540, Inf]")
 
 
-saveRDS(modelvars, file = "./network/modelvars-vsoa-20250520.rds")
-
-
-modelvars |>
-    select(word, group, ends_with("id")) |>
-    distinct() |>
-    mutate(rowname = rownames(adjmat_lst$child)[vid]) |>
-    filter(word != rowname) |>
-    count(group)
+saveRDS(modelvars, file = "./network/modelvars-vsoa-20250520-540max.rds")

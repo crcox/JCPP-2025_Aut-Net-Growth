@@ -6,7 +6,7 @@ library(psych)
 
 
 # Rename variables ----
-modelvars_df <- readRDS("./network/modelvars-vsoa-20250520.rds") |>
+modelvars_df <- readRDS("./network/modelvars-vsoa-20250520-540max.rds") |>
     mutate(
         label = paste(group, num_item_id)
     ) |>
@@ -121,7 +121,7 @@ contrasts(modelvars_df$group) <- c(-.5, .5)
 
 
 # Save revised dataframe ----
-saveRDS(modelvars_df, "network/modelvars_vsoa_RC_z.rds")
+saveRDS(modelvars_df, "network/modelvars_vsoa_RC_z-540max.rds")
 
 
 # Split dataframe by group ----
@@ -157,4 +157,4 @@ modelvars_rn <- imap(modelvars, function(.x, group) {
 #         mutate(across(ends_with(g), list(z = ~ (.x - mean(.x, na.rm = T)) / sd(.x, na.rm = T))))
 # })
 
-saveRDS(modelvars_rn, "network/modelvars_vsoa_RC_z_split.rds")
+saveRDS(modelvars_rn, "network/modelvars_vsoa_RC_z_split-540max.rds")

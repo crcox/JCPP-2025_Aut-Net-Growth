@@ -1,19 +1,6 @@
 library(dplyr)
 library(tidyr)
-
-load_to_list <- function(...) {
-    files <- rlang::list2(...)
-    purrr::map(files, function(filename) {
-        e <- new.env()
-        nm <- load(filename, envir = e)
-        e[[nm]]
-    })
-}
-
-save_as <- function(..., filename) {
-    dat <- rlang::list2(...)
-    save(list = names(dat), file = filename, envir = list2env(dat))
-}
+library(purrr)
 
 inner_join_assoc_cdi <- function(d, id_tbl) {
     d <- dplyr::inner_join(d, id_tbl)
@@ -35,7 +22,7 @@ count_participants_by_cue <- function(cues, participant_id) {
 sample_participants_by_cue <- function(d, n) {
     tidyr::pivot_wider(
         data = d,
-        id = tidyselect::everything(),
+        id_cols = tidyselect::everything(),
         names_prefix = "R",
         names_from = "RESP_ID",
         values_from = "RESPONSE"
@@ -52,10 +39,10 @@ sample_participants_by_cue <- function(d, n) {
 }
 
 # Load metadata and associations ----
-load("./data/cdi-metadata-preproc.Rdata")
-associations <- load_to_list(
-    adult = "./data/associations-adult.Rdata",
-    child = "./data/associations-child.Rdata"
+cdi_metadata_preproc <- readRDS("./data/cdi-metadata-preproc.rds")
+associations <- list(
+    adult = readRDS("./data/associations-adult.rds"),
+    child = readRDS("./data/associations-child.rds")
 )
 
 # Drop cues to match metadata-preproc ----
@@ -80,21 +67,18 @@ stopifnot(all(pmin(pp_count[, 1], pp_count[, 2]) > 95))
 # Select 100 participants (300 responses) per cue ----
 # For cues with fewer than 100 participants, include all.
 # For cues with more than 100 participants, exclude some to get to 100.
-associations <- lapply(
+associations <- map(
     associations,
     FUN = sample_participants_by_cue,
     n = 100
 )
 
 # Save processed associations ----
-names(associations) <- add_prefix(names(associations), prefix = "associations_")
-names(associations) <- add_suffix(names(associations), suffix = "_preproc")
-
-save_as(
-    associations_adult_preproc = associations$adult,
-    filename = "./data/associations-adult-preproc.Rdata"
-)
-save_as(
-    associations_child_preproc = associations$child,
-    filename = "./data/associations-child-preproc.Rdata"
-)
+associations |>
+    iwalk(~ saveRDS(
+        .x,
+        file.path(
+            "data",
+            paste("associations", .y, "preproc.rds", sep = "-")
+        )
+    ))
