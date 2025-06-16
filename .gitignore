@@ -2,3 +2,15 @@
 .Rhistory
 .RData
 .Ruserdata
+
+results/
+data/
+network/
+model-fits-split/
+
+*.swp
+
+*.rds
+*.csv
+*.pdf
+*.tar

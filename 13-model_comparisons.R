@@ -53,13 +53,13 @@ net_over_net <- function(x) {
     }) |> list_rbind(names_to = "group")
 }
 
-ME <- readRDS("model-fits-split-540max/empty-model.rds")
-M0 <- readRDS("model-fits-split-540max/baseline-model.rds")
-M0_nofreq <- readRDS("model-fits-split-540max/baseline-model-nofreq.rds")
-M1_Z <- readRDS("model-fits-split-540max/z-overall/growth-model-1.rds")
-M2_Z <- readRDS("model-fits-split-540max/z-overall/growth-model-2.rds")
-M1_Z_nofreq <- readRDS("model-fits-split-540max/z-overall/growth-model-1-nofreq.rds")
-M2_Z_nofreq <- readRDS("model-fits-split-540max/z-overall/growth-model-2-nofreq.rds")
+ME <- readRDS("model-fits-split/empty-model.rds")
+M0 <- readRDS("model-fits-split/baseline-model.rds")
+M0_nofreq <- readRDS("model-fits-split/baseline-model-nofreq.rds")
+M1_Z <- readRDS("model-fits-split/z-overall/growth-model-1.rds")
+M2_Z <- readRDS("model-fits-split/z-overall/growth-model-2.rds")
+M1_Z_nofreq <- readRDS("model-fits-split/z-overall/growth-model-1-nofreq.rds")
+M2_Z_nofreq <- readRDS("model-fits-split/z-overall/growth-model-2-nofreq.rds")
 
 # Baseline over empty ----
 df_base_empty <- map2(M0, ME, ~ {
@@ -133,7 +133,7 @@ bind_rows(
     no = df_net_net_nofreq,
     .id = "freq"
 ) |>
-    readr::write_csv("model-comparisons-20250520-540max.csv")
+    readr::write_csv("model-comparisons.csv")
 
 d_coefs <- bind_rows(
     autistic  = bind_cols(gvals = "none", M0$asd |> coef() |> as.list() |> as_tibble()),
@@ -171,8 +171,8 @@ p <- d_coefs |>
         theme_bw()
 
 ggsave(
-    "coefficients.pdf",
-    plot = p + theme(legend.position = "none"),
+    "coefficients-v2.pdf",
+    plot = p + theme(legend.position = "none") + scale_x_discrete(limits = c("RC freq", "RC biphon.", "RC PND", "Assoc.", "CHILDES")),
     width = 6.5,
     height = 2.5,
     units = "in",
@@ -216,15 +216,15 @@ p <- d_coefs_nofreq |>
         theme_bw()
 
 ggsave(
-    "coefficients_nofreq.pdf",
-    plot = p + theme(legend.position = "bottom"),
+    "coefficients_nofreq-v2.pdf",
+    plot = p + theme(legend.position = "none") + scale_x_discrete(limits = c("RC biphon.", "RC PND", "Assoc.", "CHILDES")),
     width = 6.5,
     height = 2.5,
     units = "in",
     dpi = 300
 )
 
-readr::write_csv(d_coefs_nofreq, "pac-coef-assoc-childes-nofreq.csv")
+readr::write_csv(d_coefs_nofreq, "pac-coef-assoc-childes-nofreq-v3.csv")
 
 
 bind_rows(

@@ -1,0 +1,35 @@
++SingularityImage = "osdf:///ospool/ap20/data/chriscox/containers/R4_0_2-boot.sif"
+
+num_item_id = $INT(num_item_id,%d)
+num_item_id_zp = $INT(num_item_id,%03d)
+
+o_glm = $(num_item_id_zp)_glm.rds
+o_bs = $(num_item_id_zp)_bs.rds
+o_bs_ci = $(num_item_id_zp)_bs_ci.rds
+
+r_glm = results/ci_bonf/glm/$(Cluster)-$(Process)-$(num_item_id_zp)-$(label).rds
+r_bs = results/ci_bonf/bs/$(Cluster)-$(Process)-$(num_item_id_zp)-$(label).rds
+r_bs_ci = results/ci_bonf/bs_ci/$(Cluster)-$(Process)-$(num_item_id_zp)-$(label).rds
+
+asd_na_data = asd_na-osg-2025-05-20.rds
+
+executable = "08c-osg_bootstrap.sh"
+arguments = $(num_item_id) 100000 $(asd_na_data)
+
+log    = log/$(Cluster)-$(Process)-$(num_item_id_zp)-$(label).log
+error  = log/$(Cluster)-$(Process)-$(num_item_id_zp)-$(label).err
+output = log/$(Cluster)-$(Process)-$(num_item_id_zp)-$(label).out
+
++JobDurationCategory = "Medium"
+
+transfer_input_files = bootstrap_osg.R, data/$(asd_na_data)
+
+transfer_output_files = $(o_glm), $(o_bs), $(o_bs_ci)
+transfer_output_remaps = "$(o_glm) =$(r_glm); $(o_bs) =$(r_bs); $(o_bs_ci) =$(r_bs_ci)"
+
+request_cpus   = 1
+# 4GB is sufficient for 10k iterations
+request_memory = 20GB
+request_disk   = 12GB
+
+queue num_item_id,label from item-id-label.csv

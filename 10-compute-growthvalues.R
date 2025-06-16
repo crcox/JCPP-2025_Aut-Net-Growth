@@ -7,7 +7,7 @@ library(igraph)
 library(netgrowr)
 
 # Load id key ----
-d <- readRDS("./data/vsoa-autistic-nonautistic-diff-ndar-id-fix-remodel-v2.rds")
+d <- readRDS("./data/vsoa-autistic-nonautistic-diff.rds")
 m <- readRDS("./data/cdi-metadata-preproc.rds")
 adjmat_lst <- list(
     child = readRDS("./network/assocnet-child-preproc.rds"),
@@ -110,7 +110,7 @@ growthvalues <- map(vsoa_lst, function (vsoa, adjmat_lst) {
 # Save growth values ----
 saveRDS(
     growthvalues,
-    file = "./network/growthvalues-autistic-nonautistic-20250520-540max.rds"
+    file = "./network/growthvalues-autistic-nonautistic.rds"
 )
 
 # Save wide-form data for lexical growth modeling ----
@@ -136,13 +136,13 @@ modelvars <- growthvalues |>
     filter(vocab_step != "(540, Inf]") |>
     left_join(phono_baseline, by = "word")
 
-saveRDS(modelvars, file = "./network/modelvars-vsoa-long-20250520-540max.rds")
+saveRDS(modelvars, file = "./network/modelvars-vsoa-long.rds")
 
 
 # WIDE VERSION ----
 # Read growth values ----
 growthvalues <- readRDS(
-    "./network/growthvalues-autistic-nonautistic-20250520-540max.rds"
+    "./network/growthvalues-autistic-nonautistic.rds"
 )
 
 factor_with <- function(levels, labels) {
@@ -175,4 +175,4 @@ modelvars <- growthvalues |>
     filter(vocab_step != "(540, Inf]")
 
 
-saveRDS(modelvars, file = "./network/modelvars-vsoa-20250520-540max.rds")
+saveRDS(modelvars, file = "./network/modelvars-vsoa.rds")

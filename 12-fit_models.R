@@ -5,6 +5,8 @@ library(netgrowr)
 library(parallel)
 library(progressr)
 
+# This script will take a while to run.
+
 # Helper functions ----
 fit_models <- function(x_split, formulas) {
     p <- progressor(length(x_split) * length(formulas) * length(formulas[[1]]))
