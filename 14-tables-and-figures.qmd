@@ -1,0 +1,90 @@
+---
+title: "Vocabulary Development in Autistic Children: A Network Growth Analysis: Tables and Figures"
+author:
+    - name: "Eileen Haebig"
+    - name: "Stan West"
+    - name: "Chris Cox"
+format: html
+---
+
+# Setup
+## Required packages
+
+```{r load packages}
+#| echo: true
+#| output: false
+
+library(dplyr)
+library(purrr)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+
+```
+
+## Load data
+
+```{r load data}
+cdi <- readRDS("data/asd_na-osg-2025-05-20.rds")
+ppt <- cdi |> distinct(subjectkey, group, sex, interview_age, nproduced)
+vsoa <- readRDS("data/vsoa-autistic-nonautistic-diff.rds")
+mvar <- readRDS("network/modelvars-vsoa.rds")
+meta <- readRDS("data/cdi-metadata-preproc.rds")
+base <- mvar |>
+    distinct(num_item_id, word, nphon, CHILDES_Freq, BiphonProb.avg, PNDC.avg) |>
+    mutate(across(c(nphon, CHILDES_Freq), list(log = ~ log(.x + 1))))
+
+```
+
+
+# Table 1
+
+## Vocabulary size and interview age
+
+```{r vocab size interview age}
+#| echo: true
+#| cache: true
+
+ppt |>
+    mutate(
+        group = factor(group, c("ASD", "NA"), c("autistic", "not aut."))
+    ) |>
+    group_by(group) |>
+    summarize(
+        across(
+            c(nproduced, interview_age),
+            list(mean = mean, median = median, sd = sd)
+        )
+    ) |> 
+    kable(col.names = c("group", "mean", "median", "SD", "mean", "median", "SD"), digits = 3) |>
+    kableExtra::add_header_above(header = c(" " = 1, "Productive Vocabulary" = 3, "Interview Age" = 3))
+```
+
+## Gender and Group
+
+```{r gender group}
+#| echo: true
+#| cache: true
+
+ppt |>
+    mutate(
+        group = factor(group, c("ASD", "NA"), c("autistic", "not aut.")),
+        sex = factor(sex, c("M", "F"), c("male", "female"))
+    ) |>
+    count(group, sex) |>
+    pivot_wider(id_cols = group, names_from = sex, values_from = n) |>
+    mutate(total = male + female, `ratio (M:F)` = male / female) |>
+    kable(digits = 3)
+```
+
+
+# Tables 2 and 3
+
+## Pairwise correlations among psycholinguistic baseline variables
+```{r cor base vars}
+base |> drop_na() |> nrow()
+base |>
+    select(
+        nphon:PNDC.avg)
+```
